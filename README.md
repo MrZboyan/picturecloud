@@ -75,9 +75,12 @@
 结合用户使用量和额度对使用习惯进行分析。管理员可以对整个平台进行空间分析，对用户进行封禁操作，对违规图片进行删除等操作。
 
 ## DDD 领域驱动设计
-**重构前的结构目录：**
-![重构前.png](src/main/resources/script/%E9%87%8D%E6%9E%84%E5%89%8D.png)
-**重构后的结构目录：**
+**重构前的结构目录：**  
+
+![重构前.png](src/main/resources/script/%E9%87%8D%E6%9E%84%E5%89%8D.png)  
+
+**重构后的结构目录：**  
+
 ![DDD重构目录.png](src/main/resources/script/DDD%E9%87%8D%E6%9E%84%E7%9B%AE%E5%BD%95.png)
 
 
