@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * MyBatis Plus 配置
  */
 @Configuration
-@MapperScan("com.demo.project.mapper")
+@MapperScan("com.demo.copicloud.infrastructure.mapper")
 public class MyBatisPlusConfig {
 
     /**

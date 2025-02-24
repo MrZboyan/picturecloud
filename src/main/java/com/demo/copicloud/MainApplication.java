@@ -11,7 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * 主类（项目启动入口）
  */
 @SpringBootApplication
-@MapperScan("com.demo.copicloud.infrastructure.mapper")
 @EnableAsync
 @EnableScheduling
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)

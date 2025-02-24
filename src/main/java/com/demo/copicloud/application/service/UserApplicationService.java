@@ -15,6 +15,7 @@ import java.util.Set;
 
 /**
  * 用户服务
+ * 应用服务层
  */
 public interface UserApplicationService {
 

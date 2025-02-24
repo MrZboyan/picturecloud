@@ -3,7 +3,6 @@ package com.demo.copicloud.domain.user.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.copicloud.domain.user.entity.User;
-import com.demo.copicloud.interfaces.dto.user.UserAddRequest;
 import com.demo.copicloud.interfaces.dto.user.UserQueryRequest;
 import com.demo.copicloud.interfaces.dto.user.UserUpdateMyRequest;
 import com.demo.copicloud.interfaces.dto.user.UserUpdatePasswordRequest;
@@ -54,6 +53,9 @@ public interface UserDomainService {
      */
     boolean userLogout(HttpServletRequest request);
 
+    /**
+     * 新增用户
+     */
     User addUser(User user, HttpServletRequest request);
 
     /**

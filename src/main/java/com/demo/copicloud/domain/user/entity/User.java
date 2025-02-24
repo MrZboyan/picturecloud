@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户
+ * 用户实体类
  * TableName user
  */
 @TableName(value ="user")

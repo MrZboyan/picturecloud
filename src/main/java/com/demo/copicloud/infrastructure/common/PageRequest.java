@@ -1,6 +1,6 @@
 package com.demo.copicloud.infrastructure.common;
 
-import com.demo.project.constant.CommonConstant;
+import com.demo.copicloud.infrastructure.constant.CommonConstant;
 import lombok.Data;
 
 /**

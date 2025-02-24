@@ -3,7 +3,7 @@ package com.demo.copicloud.infrastructure.annotation;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaMode;
-import com.demo.project.manager.auth.StpKit;
+import com.demo.copicloud.infrastructure.manager.auth.model.StpKit;
 import org.springframework.core.annotation.AliasFor;
 
 import java.lang.annotation.ElementType;

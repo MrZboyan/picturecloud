@@ -22,7 +22,7 @@ import java.util.UUID;
 @Component
 @Slf4j
 public class LogInterceptor {
-    @Around("execution(* com..project.controller.*.*(..))")
+    @Around("execution(* com..interfaces.controller.*.*(..))")
     public Object doInterceptor(ProceedingJoinPoint point) throws Throwable {
         // 开始计时
         StopWatch stopWatch = new StopWatch();

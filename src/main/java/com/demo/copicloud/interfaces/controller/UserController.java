@@ -2,7 +2,6 @@ package com.demo.copicloud.interfaces.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.demo.copicloud.application.service.UserApplicationService;
-import com.demo.copicloud.application.service.impl.UserApplicationServiceImpl;
 import com.demo.copicloud.domain.user.constant.UserConstant;
 import com.demo.copicloud.domain.user.entity.User;
 import com.demo.copicloud.infrastructure.annotation.AuthCheck;
@@ -11,7 +10,6 @@ import com.demo.copicloud.infrastructure.common.DeleteRequest;
 import com.demo.copicloud.infrastructure.common.ResultUtils;
 import com.demo.copicloud.infrastructure.exception.BusinessException;
 import com.demo.copicloud.infrastructure.exception.ErrorCode;
-import com.demo.copicloud.infrastructure.utils.JwtUtils;
 import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import com.demo.copicloud.interfaces.assembler.UserAssembler;
 import com.demo.copicloud.interfaces.dto.user.*;
@@ -22,16 +20,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
-import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-import static net.sf.jsqlparser.util.validation.metadata.NamedObject.user;
 
 /**
  * 用户接口

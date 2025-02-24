@@ -1,7 +1,7 @@
 package com.demo.copicloud.infrastructure.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.demo.project.model.entity.Picture;
+import com.demo.copicloud.domain.picture.entity.Picture;
 
 /**
 * @author Zangdibo
