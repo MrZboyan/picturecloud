@@ -1,6 +1,6 @@
 package com.demo.project.model.dto.picture;
 
-import com.demo.project.api.AliyunAi.modle.CreateOutPaintingTaskRequest;
+import com.demo.copicloud.infrastructure.api.AliyunAi.modle.CreateOutPaintingTaskRequest;
 import lombok.Data;
 
 import java.io.Serial;

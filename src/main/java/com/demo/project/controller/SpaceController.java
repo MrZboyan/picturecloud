@@ -1,22 +1,22 @@
 package com.demo.project.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.demo.project.annotation.AuthCheck;
-import com.demo.project.common.BaseResponse;
-import com.demo.project.common.DeleteRequest;
-import com.demo.project.common.ResultUtils;
-import com.demo.project.constant.UserConstant;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.annotation.AuthCheck;
+import com.demo.copicloud.infrastructure.common.BaseResponse;
+import com.demo.copicloud.infrastructure.common.DeleteRequest;
+import com.demo.copicloud.infrastructure.common.ResultUtils;
+import com.demo.copicloud.domain.user.constant.UserConstant;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
 import com.demo.project.manager.auth.SpaceUserAuthManager;
 import com.demo.project.model.dto.space.*;
 import com.demo.project.model.entity.Space;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.SpaceLevelEnum;
 import com.demo.project.model.vo.SpaceVO;
 import com.demo.project.service.SpaceService;
-import com.demo.project.service.UserService;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.application.service.UserApplicationService;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SpaceController {
 
-    private final UserService userService;
+    private final UserApplicationService userApplicationService;
 
     private final SpaceService spaceService;
 
@@ -52,7 +52,7 @@ public class SpaceController {
     @PostMapping("/add")
     public BaseResponse<Long> addSpace(@RequestBody SpaceAddRequest spaceAddRequest,HttpServletRequest request){
         ThrowUtils.throwIf(spaceAddRequest == null,ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         long resultId = spaceService.addSpace(spaceAddRequest, loginUser);
         return ResultUtils.success(resultId);
     }
@@ -66,7 +66,7 @@ public class SpaceController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         long id = deleteRequest.getId();
         // 判断是否存在 存在则是旧空间
         Space oldSpace = spaceService.getById(id);
@@ -133,7 +133,7 @@ public class SpaceController {
         Space space = spaceService.getById(id);
         ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR);
         SpaceVO spaceVO = spaceService.getSpaceVO(space, request);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         spaceVO.setPermissionList(permissionList);
         // 获取封装类
@@ -191,7 +191,7 @@ public class SpaceController {
         space.setEditTime(new Date());
         // 数据校验
         spaceService.validSpace(space, false);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 判断是否存在
         long id = spaceEditRequest.getId();
         Space oldSpace = spaceService.getById(id);

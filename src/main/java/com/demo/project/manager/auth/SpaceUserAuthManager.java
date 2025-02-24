@@ -8,11 +8,11 @@ import com.demo.project.manager.auth.model.SpaceUserPermissionConstant;
 import com.demo.project.manager.auth.model.SpaceUserRole;
 import com.demo.project.model.entity.Space;
 import com.demo.project.model.entity.SpaceUser;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.SpaceRoleEnum;
 import com.demo.project.model.enums.SpaceTypeEnum;
 import com.demo.project.service.SpaceUserService;
-import com.demo.project.service.UserService;
+import com.demo.copicloud.application.service.UserApplicationService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
@@ -30,7 +30,7 @@ public class SpaceUserAuthManager {
     private SpaceUserService spaceUserService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     /**
      * 从资源文件读取权限配置
@@ -75,7 +75,7 @@ public class SpaceUserAuthManager {
         List<String> ADMIN_PERMISSIONS = this.getPermissionsByRole(SpaceRoleEnum.ADMIN.getValue());
         // 公共图库
         if (space == null) {
-            if (userService.isAdmin(loginUser)) {
+            if (loginUser.isAdmin()) {
                 return ADMIN_PERMISSIONS;
             }
             // 返回浏览权限
@@ -89,7 +89,7 @@ public class SpaceUserAuthManager {
         switch (spaceTypeEnum) {
             case PRIVATE:
                 // 私有空间，仅本人或管理员有所有权限
-                if (space.getUserId().equals(loginUser.getId()) || userService.isAdmin(loginUser)) {
+                if (space.getUserId().equals(loginUser.getId()) || loginUser.isAdmin()) {
                     return ADMIN_PERMISSIONS;
                 } else {
                     return new ArrayList<>();

@@ -1,5 +1,6 @@
 package com.demo.project.model.vo;
 
+import com.demo.copicloud.interfaces.vo.user.UserVO;
 import com.demo.project.model.entity.SpaceUser;
 import lombok.Data;
 import org.springframework.beans.BeanUtils;

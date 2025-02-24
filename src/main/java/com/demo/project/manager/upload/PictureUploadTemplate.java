@@ -5,9 +5,10 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
-import com.demo.project.config.CosClientConfig;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.api.COS.CosApi;
+import com.demo.copicloud.infrastructure.config.CosClientConfig;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
 import com.demo.project.model.dto.file.UploadPictureResult;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
@@ -28,7 +29,7 @@ import java.util.List;
 public abstract class PictureUploadTemplate {
 
     @Resource
-    protected CosManager cosManager;
+    protected CosApi cosApi;
 
     @Resource
     protected CosClientConfig cosClientConfig;
@@ -59,7 +60,7 @@ public abstract class PictureUploadTemplate {
             processFile(inputSource, file);
 
             // 4. 上传图片到对象存储
-            PutObjectResult putObjectResult = cosManager.putPictureObject(uploadPath, file);
+            PutObjectResult putObjectResult = cosApi.putPictureObject(uploadPath, file);
             // 获取到图片信息
             ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
 

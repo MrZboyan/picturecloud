@@ -6,7 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.demo.project.model.dto.space.SpaceAddRequest;
 import com.demo.project.model.dto.space.SpaceQueryRequest;
 import com.demo.project.model.entity.Space;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.vo.SpaceVO;
 import jakarta.servlet.http.HttpServletRequest;
 

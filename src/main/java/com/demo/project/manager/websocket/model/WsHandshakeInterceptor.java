@@ -6,11 +6,11 @@ import com.demo.project.manager.auth.SpaceUserAuthManager;
 import com.demo.project.manager.auth.model.SpaceUserPermissionConstant;
 import com.demo.project.model.entity.Picture;
 import com.demo.project.model.entity.Space;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.SpaceTypeEnum;
 import com.demo.project.service.PictureService;
 import com.demo.project.service.SpaceService;
-import com.demo.project.service.UserService;
+import com.demo.copicloud.application.service.UserApplicationService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +30,7 @@ import java.util.Map;
 public class WsHandshakeInterceptor implements HandshakeInterceptor {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private PictureService pictureService;
@@ -52,7 +52,7 @@ public class WsHandshakeInterceptor implements HandshakeInterceptor {
                 log.error("缺少图片参数，拒绝握手");
                 return false;
             }
-            User loginUser = userService.getLoginUser(servletRequest);
+            User loginUser = userApplicationService.getLoginUser(servletRequest);
             if (ObjUtil.isEmpty(loginUser)) {
                 log.error("用户未登录，拒绝握手");
                 return false;

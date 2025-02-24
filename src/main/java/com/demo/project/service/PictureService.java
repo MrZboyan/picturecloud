@@ -3,11 +3,11 @@ package com.demo.project.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.demo.project.api.AliyunAi.modle.CreateOutPaintingTaskResponse;
-import com.demo.project.api.ImageSearch.modle.ImageSearchResult;
+import com.demo.copicloud.infrastructure.api.AliyunAi.modle.CreateOutPaintingTaskResponse;
+import com.demo.copicloud.infrastructure.api.ImageSearch.modle.ImageSearchResult;
 import com.demo.project.model.dto.picture.*;
 import com.demo.project.model.entity.Picture;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.vo.PictureVO;
 import jakarta.servlet.http.HttpServletRequest;
 

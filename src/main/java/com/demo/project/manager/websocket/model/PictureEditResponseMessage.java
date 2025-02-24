@@ -1,6 +1,6 @@
 package com.demo.project.manager.websocket.model;
 
-import com.demo.project.model.vo.UserVO;
+import com.demo.copicloud.interfaces.vo.user.UserVO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -3,7 +3,7 @@ package com.demo.project.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.demo.project.model.dto.space.analyze.*;
 import com.demo.project.model.entity.Space;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.vo.space.analyze.*;
 
 import java.util.List;

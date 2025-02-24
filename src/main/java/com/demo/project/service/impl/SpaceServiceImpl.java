@@ -7,24 +7,24 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.demo.project.constant.CommonConstant;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
 import com.demo.project.manager.sharing.DynamicShardingManager;
-import com.demo.project.mapper.SpaceMapper;
+import com.demo.copicloud.infrastructure.mapper.SpaceMapper;
 import com.demo.project.model.dto.space.SpaceAddRequest;
 import com.demo.project.model.dto.space.SpaceQueryRequest;
 import com.demo.project.model.entity.Space;
 import com.demo.project.model.entity.SpaceUser;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.SpaceLevelEnum;
 import com.demo.project.model.enums.SpaceRoleEnum;
 import com.demo.project.model.enums.SpaceTypeEnum;
 import com.demo.project.model.vo.SpaceVO;
-import com.demo.project.model.vo.UserVO;
+import com.demo.copicloud.interfaces.vo.user.UserVO;
 import com.demo.project.service.SpaceService;
 import com.demo.project.service.SpaceUserService;
-import com.demo.project.service.UserService;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.application.service.UserApplicationService;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
 public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements SpaceService {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -100,7 +100,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         Long loginUserId = loginUser.getId();
         space.setUserId(loginUserId);
         // 当用户创建的空间等级和默认的等级不符 并且不是管理员
-        if (SpaceLevelEnum.COMMON.getValue() != space.getSpaceLevel() && !userService.isAdmin(loginUser)) {
+        if (SpaceLevelEnum.COMMON.getValue() != space.getSpaceLevel() && !loginUser.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "无权限创建指定级别的空间");
         }
         // 4.控制同一用户只能创建一个私有空间 使用 Redisson 分布式锁管理
@@ -228,8 +228,8 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         // 关联查询用户信息
         Long userId = space.getUserId();
         if (userId != null && userId > 0) {
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getUserById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             spaceVO.setUser(userVO);
         }
         return spaceVO;
@@ -274,7 +274,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         // 6. 根据用户 ID 集合批量查询用户信息
         // 将查询结果转换为 Map，键为用户 ID，值为对应的用户对象列表（通常是单个对象，但用 List 表示为了通用性）
         Map<Long, List<User>> userIdUserListMap =
-                userService.listByIds(userIdSet)
+                userApplicationService.listByIds(userIdSet)
                         .stream()
                         .collect(Collectors.groupingBy(User::getId));
 
@@ -291,7 +291,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
             }
 
             // 调用 userService 的方法将 User 转换为 UserVO 并设置到 SpaceVO 对象中
-            spaceVO.setUser(userService.getUserVO(user));
+            spaceVO.setUser(userApplicationService.getUserVO(user));
         });
 
         // 8. 将转换后的 SpaceVO 列表设置为分页对象的记录数据
@@ -347,7 +347,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
     @Override
     public void checkSpaceAuth(User loginUser, Space space) {
         // 仅本人或管理员可编辑 如果既不是空间创建者 又不是管理员 则抛异常
-        if (!(space.getUserId().equals(loginUser.getId()) && userService.isAdmin(loginUser))) {
+        if (!(space.getUserId().equals(loginUser.getId()) && loginUser.isAdmin())) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
     }

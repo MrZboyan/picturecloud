@@ -5,22 +5,22 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
-import com.demo.project.mapper.SpaceUserMapper;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.mapper.SpaceUserMapper;
 import com.demo.project.model.dto.spaceuser.SpaceUserAddRequest;
 import com.demo.project.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.demo.project.model.entity.Space;
 import com.demo.project.model.entity.SpaceUser;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.SpaceRoleEnum;
 import com.demo.project.model.vo.SpaceUserVO;
 import com.demo.project.model.vo.SpaceVO;
-import com.demo.project.model.vo.UserVO;
+import com.demo.copicloud.interfaces.vo.user.UserVO;
 import com.demo.project.service.SpaceService;
 import com.demo.project.service.SpaceUserService;
-import com.demo.project.service.UserService;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.application.service.UserApplicationService;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.BeanUtils;
@@ -43,7 +43,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         implements SpaceUserService {
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     @Lazy
@@ -81,7 +81,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         Long userId = spaceUser.getUserId();
         if (add) {
             ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), ErrorCode.PARAMS_ERROR);
-            User user = userService.getById(userId);
+            User user = userApplicationService.getUserById(userId);
             ThrowUtils.throwIf(user == null, ErrorCode.NOT_FOUND_ERROR, "用户不存在");
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
@@ -108,8 +108,8 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
         // 关联查询用户信息
         Long userId = spaceUser.getUserId();
         if (userId != null && userId > 0) {
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getUserById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             spaceUserVO.setUser(userVO);
         }
         // 关联查询空间信息
@@ -148,7 +148,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
                 .collect(Collectors.toSet());
 
         // 2. 批量查询用户和空间
-        Map<Long, List<User>> userIdUserListMap = userService.listByIds(userIdSet)
+        Map<Long, List<User>> userIdUserListMap = userApplicationService.listByIds(userIdSet)
                 .stream()
                 .collect(Collectors.groupingBy(User::getId));
         Map<Long, List<Space>> spaceIdSpaceListMap = spaceService.listByIds(spaceIdSet)
@@ -164,7 +164,7 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
             if (userIdUserListMap.containsKey(userId)) {
                 user = userIdUserListMap.get(userId).get(0);
             }
-            spaceUserVO.setUser(userService.getUserVO(user));
+            spaceUserVO.setUser(userApplicationService.getUserVO(user));
             // 填充空间信息
             Space space = null;
             if (spaceIdSpaceListMap.containsKey(spaceId)) {

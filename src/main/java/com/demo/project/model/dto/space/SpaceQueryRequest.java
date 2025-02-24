@@ -1,6 +1,6 @@
 package com.demo.project.model.dto.space;
 
-import com.demo.project.common.PageRequest;
+import com.demo.copicloud.infrastructure.common.PageRequest;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

@@ -9,32 +9,32 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.demo.project.api.AliyunAi.AliYunAiApi;
-import com.demo.project.api.AliyunAi.modle.CreateOutPaintingTaskRequest;
-import com.demo.project.api.AliyunAi.modle.CreateOutPaintingTaskResponse;
-import com.demo.project.api.ImageSearch.ImageSearchApiFacade;
-import com.demo.project.api.ImageSearch.modle.ImageSearchResult;
+import com.demo.copicloud.infrastructure.api.AliyunAi.AliYunAiApi;
+import com.demo.copicloud.infrastructure.api.AliyunAi.modle.CreateOutPaintingTaskRequest;
+import com.demo.copicloud.infrastructure.api.AliyunAi.modle.CreateOutPaintingTaskResponse;
+import com.demo.copicloud.infrastructure.api.ImageSearch.ImageSearchApiFacade;
+import com.demo.copicloud.infrastructure.api.ImageSearch.modle.ImageSearchResult;
 import com.demo.project.constant.CommonConstant;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
-import com.demo.project.manager.upload.CosManager;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.api.COS.CosApi;
 import com.demo.project.manager.upload.FilePictureUpload;
 import com.demo.project.manager.upload.PictureUploadTemplate;
 import com.demo.project.manager.upload.UrlPictureUpload;
-import com.demo.project.mapper.PictureMapper;
+import com.demo.copicloud.infrastructure.mapper.PictureMapper;
 import com.demo.project.model.dto.file.UploadPictureResult;
 import com.demo.project.model.dto.picture.*;
 import com.demo.project.model.entity.Picture;
 import com.demo.project.model.entity.Space;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.PictureReviewStatusEnum;
 import com.demo.project.model.vo.PictureVO;
-import com.demo.project.model.vo.UserVO;
+import com.demo.copicloud.interfaces.vo.user.UserVO;
 import com.demo.project.service.PictureService;
 import com.demo.project.service.SpaceService;
-import com.demo.project.service.UserService;
-import com.demo.project.utils.ColorSimilarityUtil;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.application.service.UserApplicationService;
+import com.demo.copicloud.infrastructure.utils.ColorSimilarityUtil;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.annotation.Resource;
@@ -76,10 +76,10 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     private UrlPictureUpload urlPictureUpload;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
-    private CosManager cosManager;
+    private CosApi cosApi;
 
     @Resource
     private SpaceService spaceService;
@@ -139,7 +139,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             Picture oldPicture = this.getById(pictureId);
             ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR, "图片不存在");
             // 判断是否为当前用户或管理员上传的图片不是则抛异常
-            if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+            if (!oldPicture.getUserId().equals(loginUser.getId()) && !loginUser.isAdmin()) {
                 throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "没有权限");
             }
             // 校验空间是否一致
@@ -338,7 +338,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture oldPicture = this.getById(pictureId);
         ThrowUtils.throwIf(oldPicture == null, ErrorCode.NOT_FOUND_ERROR);
         // 仅本人或管理员可删除 如果不是当前用户上传或创建的 或不是管理员 则无权限删除 不可操作
-        if (!oldPicture.getUserId().equals(loginUser.getId()) && !userService.isAdmin(loginUser)) {
+        if (!oldPicture.getUserId().equals(loginUser.getId()) && !loginUser.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_AUTH_ERROR);
         }
         // this.checkPictureAuth(loginUser, oldPicture);
@@ -624,8 +624,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 关联查询用户信息
         Long userId = picture.getUserId();
         if (userId != null && userId > 0) {
-            User user = userService.getById(userId);
-            UserVO userVO = userService.getUserVO(user);
+            User user = userApplicationService.getUserById(userId);
+            UserVO userVO = userApplicationService.getUserVO(user);
             pictureVO.setUser(userVO);
         }
         return pictureVO;
@@ -671,7 +671,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 6. 根据用户 ID 集合批量查询用户信息
         // 将查询结果转换为 Map，键为用户 ID，值为对应的用户对象列表（通常是单个对象，但用 List 表示为了通用性）
         Map<Long, List<User>> userIdUserListMap =
-                userService.listByIds(userIdSet)
+                userApplicationService.listByIds(userIdSet)
                         .stream()
                         .collect(Collectors.groupingBy(User::getId));
 
@@ -688,7 +688,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             }
 
             // 调用 userService 的方法将 User 转换为 UserVO 并设置到 PictureVO 对象中
-            pictureVO.setUser(userService.getUserVO(user));
+            pictureVO.setUser(userApplicationService.getUserVO(user));
         });
 
         // 8. 将转换后的 PictureVO 列表设置为分页对象的记录数据
@@ -850,7 +850,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     @Override
     public void fillReviewParams(Picture picture, User loginUser) {
         // 首先判断当前用户是否为管理员
-        if (userService.isAdmin(loginUser)) {
+        if (loginUser.isAdmin()) {
             // 是管理员自动过审 填充参数
             picture.setReviewStatus(PictureReviewStatusEnum.PASS.getValue());
             picture.setReviewerId(loginUser.getId());
@@ -882,11 +882,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 对象键为 doc/picture.jpg 此处传入的 key 的值就是对象键
         // 清理 webp 文件
         String objKey = this.checkUrl(oldPicture.getUrl());
-        cosManager.deleteObject(objKey);
+        cosApi.deleteObject(objKey);
         // 清理缩略图
         objKey = this.checkUrl(oldPicture.getThumbnailUrl());
         if (StrUtil.isNotBlank(objKey)) {
-            cosManager.deleteObject(objKey);
+            cosApi.deleteObject(objKey);
         }
     }
 

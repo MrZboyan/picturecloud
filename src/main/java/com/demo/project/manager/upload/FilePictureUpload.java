@@ -1,8 +1,8 @@
 package com.demo.project.manager.upload;
 
 import cn.hutool.core.io.FileUtil;
-import com.demo.project.exception.ErrorCode;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

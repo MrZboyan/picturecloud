@@ -10,20 +10,20 @@ import cn.hutool.extra.servlet.JakartaServletUtil;
 import cn.hutool.http.ContentType;
 import cn.hutool.http.Header;
 import cn.hutool.json.JSONUtil;
-import com.demo.project.constant.UserConstant;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
+import com.demo.copicloud.domain.user.constant.UserConstant;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
 import com.demo.project.manager.auth.model.SpaceUserPermissionConstant;
 import com.demo.project.model.entity.Picture;
 import com.demo.project.model.entity.Space;
 import com.demo.project.model.entity.SpaceUser;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.SpaceRoleEnum;
 import com.demo.project.model.enums.SpaceTypeEnum;
 import com.demo.project.service.PictureService;
 import com.demo.project.service.SpaceService;
 import com.demo.project.service.SpaceUserService;
-import com.demo.project.service.UserService;
+import com.demo.copicloud.application.service.UserApplicationService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -45,7 +45,7 @@ public class StpInterfaceImpl implements StpInterface {
     private String contextPath;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     @Resource
     private SpaceService spaceService;
@@ -105,7 +105,7 @@ public class StpInterfaceImpl implements StpInterface {
             }
             // 对系统管理员或当前空间管理员赋予操作权限
             return spaceUserAuthManager.getPermissionsByRole
-                    (userService.isAdmin(loginUser) ? SpaceRoleEnum.ADMIN.getValue() : loginSpaceUser.getSpaceRole());
+                    (loginUser.isAdmin() ? SpaceRoleEnum.ADMIN.getValue() : loginSpaceUser.getSpaceRole());
         }
         // 如果没有 spaceUserId，尝试通过 spaceId 或 pictureId 获取 Space 对象并处理
         Long spaceId = authContext.getSpaceId();
@@ -126,7 +126,7 @@ public class StpInterfaceImpl implements StpInterface {
             spaceId = picture.getSpaceId();
             // 公共图库，仅本人或管理员可操作
             if (spaceId == null) {
-                if (picture.getUserId().equals(userId) || userService.isAdmin(loginUser)) {
+                if (picture.getUserId().equals(userId) || loginUser.isAdmin()) {
                     return ADMIN_PERMISSIONS;
                 } else {
                     // 不是自己的图片，仅可查看
@@ -142,7 +142,7 @@ public class StpInterfaceImpl implements StpInterface {
         // 根据 Space 类型判断权限
         if (space.getSpaceType() == SpaceTypeEnum.PRIVATE.getValue()) {
             // 私有空间，仅本人或管理员有权限
-            if (space.getUserId().equals(userId) || userService.isAdmin(loginUser)) {
+            if (space.getUserId().equals(userId) || loginUser.isAdmin()) {
                 return ADMIN_PERMISSIONS;
             } else {
                 return new ArrayList<>();

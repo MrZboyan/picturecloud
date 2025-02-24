@@ -1,22 +1,22 @@
 package com.demo.project.controller;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.demo.project.annotation.SaSpaceCheckPermission;
-import com.demo.project.common.BaseResponse;
-import com.demo.project.common.DeleteRequest;
-import com.demo.project.common.ResultUtils;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.annotation.SaSpaceCheckPermission;
+import com.demo.copicloud.infrastructure.common.BaseResponse;
+import com.demo.copicloud.infrastructure.common.DeleteRequest;
+import com.demo.copicloud.infrastructure.common.ResultUtils;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
 import com.demo.project.manager.auth.model.SpaceUserPermissionConstant;
 import com.demo.project.model.dto.spaceuser.SpaceUserAddRequest;
 import com.demo.project.model.dto.spaceuser.SpaceUserEditRequest;
 import com.demo.project.model.dto.spaceuser.SpaceUserQueryRequest;
 import com.demo.project.model.entity.SpaceUser;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.vo.SpaceUserVO;
 import com.demo.project.service.SpaceUserService;
-import com.demo.project.service.UserService;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.application.service.UserApplicationService;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
@@ -40,7 +40,7 @@ public class SpaceUserController {
     private SpaceUserService spaceUserService;
 
     @Resource
-    private UserService userService;
+    private UserApplicationService userApplicationService;
 
     /**
      * 添加成员到空间
@@ -137,7 +137,7 @@ public class SpaceUserController {
     @PostMapping("/list/my")
     @Operation(summary = "查询我加入的团队空间列表")
     public BaseResponse<List<SpaceUserVO>> listMyTeamSpace(HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         SpaceUserQueryRequest spaceUserQueryRequest = new SpaceUserQueryRequest();
         spaceUserQueryRequest.setUserId(loginUser.getId());
         List<SpaceUser> spaceUserList = spaceUserService.list(

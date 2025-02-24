@@ -2,32 +2,32 @@ package com.demo.project.controller;
 
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.demo.project.annotation.AuthCheck;
-import com.demo.project.annotation.SaSpaceCheckPermission;
-import com.demo.project.api.AliyunAi.AliYunAiApi;
-import com.demo.project.api.AliyunAi.modle.CreateOutPaintingTaskResponse;
-import com.demo.project.api.AliyunAi.modle.GetOutPaintingTaskResponse;
-import com.demo.project.api.ImageSearch.modle.ImageSearchResult;
-import com.demo.project.common.BaseResponse;
-import com.demo.project.common.DeleteRequest;
-import com.demo.project.common.ResultUtils;
-import com.demo.project.constant.UserConstant;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.annotation.AuthCheck;
+import com.demo.copicloud.infrastructure.annotation.SaSpaceCheckPermission;
+import com.demo.copicloud.infrastructure.api.AliyunAi.AliYunAiApi;
+import com.demo.copicloud.infrastructure.api.AliyunAi.modle.CreateOutPaintingTaskResponse;
+import com.demo.copicloud.infrastructure.api.AliyunAi.modle.GetOutPaintingTaskResponse;
+import com.demo.copicloud.infrastructure.api.ImageSearch.modle.ImageSearchResult;
+import com.demo.copicloud.infrastructure.common.BaseResponse;
+import com.demo.copicloud.infrastructure.common.DeleteRequest;
+import com.demo.copicloud.infrastructure.common.ResultUtils;
+import com.demo.copicloud.domain.user.constant.UserConstant;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
 import com.demo.project.manager.auth.SpaceUserAuthManager;
 import com.demo.project.manager.auth.StpKit;
 import com.demo.project.manager.auth.model.SpaceUserPermissionConstant;
 import com.demo.project.model.dto.picture.*;
 import com.demo.project.model.entity.Picture;
 import com.demo.project.model.entity.Space;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import com.demo.project.model.enums.PictureReviewStatusEnum;
 import com.demo.project.model.vo.PictureTagCategory;
 import com.demo.project.model.vo.PictureVO;
 import com.demo.project.service.PictureService;
 import com.demo.project.service.SpaceService;
-import com.demo.project.service.UserService;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.application.service.UserApplicationService;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,7 +47,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PictureController {
 
-    private final UserService userService;
+    private final UserApplicationService userApplicationService;
 
     private final PictureService pictureService;
 
@@ -79,7 +79,7 @@ public class PictureController {
     @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_VIEW)
     public BaseResponse<PictureVO> uploadPicture(@RequestPart("file") MultipartFile file, PictureUploadRequest pictureUploadRequest,
                                                  HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         PictureVO pictureVO = pictureService.uploadPicture(file, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
     }
@@ -93,7 +93,7 @@ public class PictureController {
     public BaseResponse<Integer> uploadPictures(MultipartFile[] file, PictureUploadRequest pictureUploadRequest,
                                                 HttpServletRequest request) {
         ThrowUtils.throwIf(file == null, ErrorCode.PARAMS_ERROR, "文件不能为空");
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 计数器
         Integer count = 0;
         // 获取所有文件依次上传
@@ -111,7 +111,7 @@ public class PictureController {
     @PostMapping("/upload/url")
     @SaSpaceCheckPermission(value = SpaceUserPermissionConstant.PICTURE_VIEW)
     public BaseResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest, HttpServletRequest request) {
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         String fileUrl = pictureUploadRequest.getFileUrl();
         PictureVO pictureVO = pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser);
         return ResultUtils.success(pictureVO);
@@ -126,7 +126,7 @@ public class PictureController {
     public BaseResponse<Integer> uploadPictureByBatch(@RequestBody PictureUploadByBatchRequest pictureUploadByBatchRequest,
                                                       HttpServletRequest request) {
         ThrowUtils.throwIf(pictureUploadByBatchRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         int uploadCount = pictureService.uploadPictureByBatch(pictureUploadByBatchRequest, loginUser);
         return ResultUtils.success(uploadCount);
     }
@@ -141,7 +141,7 @@ public class PictureController {
         if (deleteRequest == null || deleteRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.deletePicture(deleteRequest.getId(),loginUser);
         return ResultUtils.success(true);
     }
@@ -164,7 +164,7 @@ public class PictureController {
         picture.setTags(JSONUtil.toJsonStr(pictureUpdateRequest.getTags()));
         // 数据校验
         pictureService.validPicture(picture);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         // 判断是否存在于数据库
         long id = pictureUpdateRequest.getId();
         Picture oldPicture = pictureService.getById(id);
@@ -214,7 +214,7 @@ public class PictureController {
             ThrowUtils.throwIf(space == null, ErrorCode.NOT_FOUND_ERROR, "空间不存在");
         }
         // 获取权限列表
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<String> permissionList = spaceUserAuthManager.getPermissionList(space, loginUser);
         PictureVO pictureVO = pictureService.getPictureVO(picture, request);
         pictureVO.setPermissionList(permissionList);
@@ -293,7 +293,7 @@ public class PictureController {
         if (pictureEditRequest == null || pictureEditRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.editPicture(pictureEditRequest,loginUser);
         return ResultUtils.success(true);
     }
@@ -310,7 +310,7 @@ public class PictureController {
                                                  HttpServletRequest request) {
         // 参数校验
         ThrowUtils.throwIf(pictureReviewRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.doPictureReview(pictureReviewRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -338,7 +338,7 @@ public class PictureController {
     public BaseResponse<List<PictureVO>> searchImageByColor(@RequestBody SearchPictureByColorRequest searchRequest,
                                                             HttpServletRequest request) {
         ThrowUtils.throwIf(searchRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         List<PictureVO> pictureVOS = pictureService.searchPictureByColor(searchRequest, loginUser);
         return ResultUtils.success(pictureVOS);
     }
@@ -352,7 +352,7 @@ public class PictureController {
     public BaseResponse<Boolean> batchEditPicture(@RequestBody PictureEditByBatchRequest pictureEditByBatchRequest,
                                                   HttpServletRequest request) {
         ThrowUtils.throwIf(pictureEditByBatchRequest == null, ErrorCode.PARAMS_ERROR);
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         pictureService.editPictureByBatch(pictureEditByBatchRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -369,7 +369,7 @@ public class PictureController {
         if (createPictureOutPaintingTaskRequest == null || createPictureOutPaintingTaskRequest.getPictureId() == null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        User loginUser = userService.getLoginUser(request);
+        User loginUser = userApplicationService.getLoginUser(request);
         CreateOutPaintingTaskResponse taskResponse = pictureService
                 .createPictureOutPaintingTask(createPictureOutPaintingTaskRequest, loginUser);
         return ResultUtils.success(taskResponse);

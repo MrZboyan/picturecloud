@@ -5,9 +5,9 @@ import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpStatus;
 import cn.hutool.http.HttpUtil;
 import cn.hutool.http.Method;
-import com.demo.project.exception.BusinessException;
-import com.demo.project.exception.ErrorCode;
-import com.demo.project.utils.ThrowUtils;
+import com.demo.copicloud.infrastructure.exception.BusinessException;
+import com.demo.copicloud.infrastructure.exception.ErrorCode;
+import com.demo.copicloud.infrastructure.utils.ThrowUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.File;

@@ -1,7 +1,7 @@
 package com.demo.project.manager.websocket.disruptor;
 
 import com.demo.project.manager.websocket.model.PictureEditRequestMessage;
-import com.demo.project.model.entity.User;
+import com.demo.copicloud.domain.user.entity.User;
 import lombok.Data;
 import org.springframework.web.socket.WebSocketSession;
 
