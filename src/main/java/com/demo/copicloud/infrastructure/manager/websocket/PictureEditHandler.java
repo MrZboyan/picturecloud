@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -25,6 +26,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@Slf4j
 public class PictureEditHandler extends TextWebSocketHandler {
 
     @Resource
@@ -50,6 +52,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+
         // 保存会话到集合中
         User user = (User) session.getAttributes().get("user");
         Long pictureId = (Long) session.getAttributes().get("pictureId");
@@ -73,7 +76,7 @@ public class PictureEditHandler extends TextWebSocketHandler {
      * @param message 操作消息
      */
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleTextMessage(WebSocketSession session, TextMessage message) {
         // 将消息解析为 PictureEditMessage
         PictureEditRequestMessage pictureEditRequestMessage = JSONUtil.toBean(message.getPayload(), PictureEditRequestMessage.class);
         // 从 Session 属性中获取公共参数
@@ -83,7 +86,6 @@ public class PictureEditHandler extends TextWebSocketHandler {
         // 生产消息
         pictureEditEventProducer.publishEvent(pictureEditRequestMessage, session, user, pictureId);
     }
-
 
     /**
      * 连接关闭时，处理消息

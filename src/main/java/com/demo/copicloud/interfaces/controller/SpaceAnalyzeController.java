@@ -122,6 +122,4 @@ public class SpaceAnalyzeController {
         List<Space> resultList = spaceAnalyzeApplicationService.getSpaceRankAnalyze(spaceRankAnalyzeRequest, loginUser);
         return ResultUtils.success(resultList);
     }
-
-
 }
